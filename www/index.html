@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NutriSnap – AI Calorie Tracker</title>
+<style>
+:root{--bg:#f2f3f5;--card:#fff;--text:#16191c;--mute:#7a838c;--acc:#3dbb14;--line:#e4e7ea;--warn:#e0852b;--pc:#fde4ea;--pt:#c0395a;--fc:#fdebd9;--ft:#b8651b;--cc:#dff5d8;--ct:#2b8a10;--hc:#dde9fb;--ht:#2d60b5;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1214;--card:#1a1e21;--text:#eceff1;--mute:#939ca4;--acc:#55d42c;--line:#2a3035;--pc:#46222b;--pt:#ff8aa5;--fc:#47301a;--ft:#ffb774;--cc:#1f3a17;--ct:#7fe05f;--hc:#1c2d47;--ht:#8ab8ff}}
+:root[data-theme="dark"]{--bg:#0f1214;--card:#1a1e21;--text:#eceff1;--mute:#939ca4;--acc:#55d42c;--line:#2a3035;--pc:#46222b;--pt:#ff8aa5;--fc:#47301a;--ft:#ffb774;--cc:#1f3a17;--ct:#7fe05f;--hc:#1c2d47;--ht:#8ab8ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:480px;margin:0 auto;padding:16px 16px 96px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.top h1{font-size:20px;margin:0}
+.ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:18px}
+.wk{display:flex;align-items:center;gap:4px;margin-bottom:12px}
+.wk button.nav{background:none;border:0;color:var(--mute);font-size:22px;padding:4px 6px}
+.days{flex:1;display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px}
+.dy{background:none;border:0;color:var(--text);padding:2px 0;font:inherit}
+.dy small{display:block;color:var(--mute);font-size:11px}
+.dy span{display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;font-size:15px;margin-top:2px}
+.dy.sel span{background:var(--acc);color:#fff;font-weight:700}
+.dy.fut{opacity:.35}
+.card{background:var(--card);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.rw{display:flex;align-items:center;gap:16px}
+.ring{position:relative;width:128px;height:128px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-size:28px}.ring span{font-size:12px;color:var(--mute)}
+.mc{flex:1;display:grid;gap:10px}
+.m{font-size:13px}.m .h{display:flex;justify-content:space-between}.m .h span{color:var(--mute)}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+h2{font-size:15px;color:var(--mute);margin:16px 0 8px;font-weight:600}
+.ml{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:0;border-radius:18px;padding:12px;margin-bottom:10px;color:var(--text);font:inherit;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ml img,.ml .ph{width:56px;height:56px;border-radius:12px;object-fit:cover;background:var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-size:24px}
+.ml .i{flex:1;min-width:0}.ml b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml .tm{font-size:12px;color:var(--mute)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ch{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.ch.p{background:var(--pc);color:var(--pt)}.ch.f{background:var(--fc);color:var(--ft)}.ch.c{background:var(--cc);color:var(--ct)}.ch.h{background:var(--hc);color:var(--ht)}
+.empty{color:var(--mute);text-align:center;padding:20px;font-size:14px}
+.fab{position:fixed;right:max(20px,calc(50% - 220px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:#111;color:#fff;font-size:32px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+@media (prefers-color-scheme:dark){.fab{background:var(--acc);color:#0b1a06}}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.ov[hidden]{display:none}
+.sh{background:var(--card);width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92%;overflow:auto}
+.sh h3{margin:0 0 12px;text-align:center;font-size:18px}
+.opt{display:flex;gap:12px;align-items:center;width:100%;border:0;background:none;color:var(--text);font:inherit;padding:12px 4px;text-align:left}
+.opt i{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;background:var(--cc)}
+.opt:nth-child(2) i{background:var(--pc)}.opt:nth-child(3) i{background:var(--hc)}
+textarea,input[type=number]{width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+textarea{height:130px;resize:none}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fl{background:var(--bg);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:6px}
+.fl label{font-size:12px;color:var(--mute);flex:1}
+.fl input{width:64px;text-align:right;border:0;background:none;padding:0;font-size:18px;font-weight:700;color:var(--text);font-family:inherit}
+.fl.big{flex-direction:column;align-items:flex-start;gap:0}.fl.big input{text-align:left;width:100%}
+.step{display:flex;align-items:center;justify-content:space-between}
+.step button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:18px}
+.btn{width:100%;padding:14px;border:0;border-radius:14px;background:var(--acc);color:#fff;font-size:16px;font-weight:700;margin-top:6px}
+.btn.s{background:var(--bg);color:var(--text)}.btn.d{background:none;color:var(--warn)}
+.btn:disabled{opacity:.5}
+.pre{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.pre button{padding:8px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:13px}
+.err{color:var(--warn);font-size:14px;margin:8px 0;text-align:center}
+.hint{font-size:12px;color:var(--mute);margin:4px 0 10px}
+.big-img{width:100%;height:150px;object-fit:cover;border-radius:16px;margin-bottom:10px}
+.spin{text-align:center;padding:30px;color:var(--mute)}
+.note{font-size:12px;color:var(--mute);text-align:center;margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><h1>🥗 NutriSnap</h1><button class="ib" id="gear" aria-label="Goals">⚙️</button></div>
+<div class="wk"><button class="nav" id="pv" aria-label="Previous week">‹</button><div class="days" id="days"></div><button class="nav" id="nx" aria-label="Next week">›</button></div>
+<div class="card"><div class="rw">
+  <div class="ring"><svg width="128" height="128" viewBox="0 0 128 128"><circle cx="64" cy="64" r="54" fill="none" stroke="var(--line)" stroke-width="12"/><circle id="arc" cx="64" cy="64" r="54" fill="none" stroke="var(--acc)" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3"/></svg>
+  <div class="c"><b id="kc">0</b><span id="kl">Calories left</span></div></div>
+  <div class="mc" id="mc"></div></div>
+  <div class="hint" id="wsum" style="margin:12px 0 0;text-align:center"></div></div>
+<h2 id="mh">Meals</h2>
+<div id="list"></div>
+<div class="note">Values are AI estimates, not medical advice. Your data and API key stay on this device.</div>
+</main>
+<button class="fab" id="fab" aria-label="Add meal">+</button>
+<div class="ov" id="ov" hidden><div class="sh" id="sh"></div></div>
+<input id="fcam" type="file" accept="image/*" capture="environment" hidden>
+<input id="falb" type="file" accept="image/*" hidden>
+
+<script>
+const $=id=>document.getElementById(id);
+let G={kcal:2000,p:150,c:200,f:65},M=[];
+try{const r=JSON.parse(localStorage.getItem('ns2')||'null');if(r){G=r.G||G;M=r.M||[]}else{const o=JSON.parse(localStorage.getItem('nutrisnap')||'null');if(o){G.kcal=o.goal||2000;M=(o.meals||[]).map(m=>({id:m.id,d:m.d,t:'',name:m.name,b:{k:m.kcal,p:m.p,c:m.c,f:m.f},n:1,hs:0,img:''}))}}}catch(e){}
+const save=()=>{try{localStorage.setItem('ns2',JSON.stringify({G,M}))}catch(e){}};
+const dk=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const pd=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const R=Math.round,eff=m=>({k:R(m.b.k*m.n),p:R(m.b.p*m.n),c:R(m.b.c*m.n),f:R(m.b.f*m.n)});
+const sum=ms=>ms.reduce((a,m)=>{const e=eff(m);return{k:a.k+e.k,p:a.p+e.p,c:a.c+e.c,f:a.f+e.f}},{k:0,p:0,c:0,f:0});
+let sel=dk(new Date()),off=0;
+
+function render(){
+  const today=dk(new Date()),st=new Date();st.setDate(st.getDate()-st.getDay()+off*7);
+  let h='';for(let i=0;i<7;i++){const d=new Date(st);d.setDate(st.getDate()+i);const k=dk(d);
+    h+=`<button class="dy ${k===sel?'sel':''} ${k>today?'fut':''}" data-d="${k}"><small>${'SMTWTFS'[i]}</small><span>${d.getDate()}</span></button>`}
+  $('days').innerHTML=h;
+  const ms=M.filter(m=>m.d===sel),t=sum(ms),rem=G.kcal-t.k;
+  $('kc').textContent=Math.abs(rem);$('kl').textContent=rem>=0?'Calories left':'Calories over';
+  $('arc').style.strokeDashoffset=339.3*(1-Math.min(t.k/G.kcal,1));
+  $('arc').style.stroke=rem<0?'var(--warn)':'var(--acc)';
+  $('mc').innerHTML=[['Protein',t.p,G.p],['Fats',t.f,G.f],['Carbs',t.c,G.c]].map(([n,v,g])=>
+    `<div class="m"><div class="h"><b>${n}</b><span>${v}/${g}g</span></div><div class="bar"><i style="width:${Math.min(v/g*100,100)}%;${v>g?'background:var(--warn)':''}"></i></div></div>`).join('');
+  let wt=0,wd=0;for(let i=0;i<7;i++){const d=new Date(st);d.setDate(st.getDate()+i);const s=sum(M.filter(m=>m.d===dk(d)));if(s.k){wt+=s.k;wd++}}
+  $('wsum').textContent=wd?`This week: ${wt} kcal · avg ${R(wt/wd)}/day`:'No meals logged this week';
+  $('mh').textContent=sel===today?'Meals today':'Meals on '+pd(sel).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  $('list').innerHTML=ms.length?ms.slice().reverse().map(m=>{const e=eff(m);return `<button class="ml" data-id="${m.id}">${m.img?`<img src="${m.img}" alt="">`:'<div class="ph">🍽️</div>'}<div class="i"><b>${esc(m.name)}</b><div class="tm">${m.t}${m.n!==1?' · ×'+m.n:''}</div><b style="font-size:15px">${e.k} Calories</b><div class="chips"><span class="ch p">${e.p}g Pro</span><span class="ch f">${e.f}g Fats</span><span class="ch c">${e.c}g Carbs</span></div></div></button>`}).join(''):'<div class="empty">No meals logged. Tap + to add one.</div>';
+}
+$('days').onclick=e=>{const b=e.target.closest('.dy');if(b){sel=b.dataset.d;render()}};
+$('pv').onclick=()=>{off--;render()};$('nx').onclick=()=>{off++;render()};
+$('list').onclick=e=>{const b=e.target.closest('.ml');if(b){const m=M.find(x=>x.id==b.dataset.id);if(m)openMeal(JSON.parse(JSON.stringify(m)),false)}};
+
+const ov=$('ov'),sh=$('sh');
+const show=h=>{sh.innerHTML=h;ov.hidden=false};
+const close=()=>{ov.hidden=true;sh.innerHTML=''};
+ov.onclick=e=>{if(e.target===ov&&!sh.querySelector('.spin'))close()};
+
+$('fab').onclick=()=>{show(`<h3>Add a meal</h3><button class="opt" id="oc"><i>📷</i>Camera</button><button class="opt" id="oa"><i>🖼️</i>Upload from Album</button><button class="opt" id="od"><i>✏️</i>Describe Meal</button>`);
+  $('oc').onclick=()=>{close();$('fcam').click()};$('oa').onclick=()=>{close();$('falb').click()};$('od').onclick=describe};
+function describe(){show(`<h3>Describe your meal</h3><textarea id="tx" placeholder="e.g. 2 eggs scrambled in butter with a piece of sourdough bread"></textarea><div class="err" id="er" hidden></div><button class="btn" id="an">Analyze meal</button><button class="btn s" id="cl">Cancel</button>`);
+  $('cl').onclick=close;$('an').onclick=()=>{const t=$('tx').value.trim();if(!t){$('er').textContent='Describe what you ate first.';$('er').hidden=false;return}analyze(null,t)}}
+
+async function shrink(f){const bmp=await createImageBitmap(f);const mk=mx=>{const sc=Math.min(1,mx/Math.max(bmp.width,bmp.height));const cv=document.createElement('canvas');cv.width=R(bmp.width*sc);cv.height=R(bmp.height*sc);cv.getContext('2d').drawImage(bmp,0,0,cv.width,cv.height);return cv};
+  const big=mk(768),sm=mk(120);return{blob:await new Promise(r=>big.toBlob(r,'image/jpeg',.8)),thumb:sm.toDataURL('image/jpeg',.6)}}
+async function onFile(e){const f=e.target.files[0];e.target.value='';if(!f)return;
+  show('<div class="spin">Analyzing…</div>');
+  try{const p=await shrink(f);await analyze(p.blob,'',p.thumb)}catch(x){fail('Could not read that image.')}}
+$('fcam').onchange=onFile;$('falb').onchange=onFile;
+function fail(m){show(`<h3>Something went wrong</h3><div class="err">${esc(m)}</div><button class="btn" id="ok">OK</button>`);$('ok').onclick=close}
+
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||'';localStorage.setItem(k,v)}catch(e){return ''}};
+const b64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+function needKey(){show(`<h3>Add your Gemini key</h3><div class="hint" style="text-align:center">Get a free key at aistudio.google.com/app/apikey, then paste it in Settings.</div><button class="btn" id="ok">Open settings</button><button class="btn s" id="cl">Cancel</button>`);$('cl').onclick=close;$('ok').onclick=()=>{close();$('gear').click()}}
+async function analyze(blob,text,thumb){
+  const key=LS('ns_key');if(!key)return needKey();
+  show('<div class="spin">Analyzing…</div>');
+  try{
+    const model=LS('ns_model')||'gemini-2.5-flash';
+    const prompt='You are a nutrition estimator. Estimate the nutrition for ONE serving of the meal'+(blob?' in the attached photo':'')+(text?'. User description: "'+text+'"':'')+'. Return ONLY JSON: {"name":string (short title),"kcal":number,"p":number (protein g),"c":number (carbs g),"f":number (fat g),"hs":number (health score 1-10)}. Realistic portions, integers.';
+    const parts=[{text:prompt}];
+    if(blob)parts.push({inline_data:{mime_type:'image/jpeg',data:await b64(blob)}});
+    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts}],generationConfig:{responseMimeType:'application/json'}})});
+    if(!res.ok){const j=await res.json().catch(()=>({}));const msg=(j.error&&j.error.message)||'';
+      return fail(res.status===429?'Rate limit reached. Free keys allow only a few requests per minute, so wait a bit and retry.':res.status===400||res.status===403?'Gemini rejected the request. Check your API key and model name in Settings. '+msg.slice(0,120):'Gemini error ('+res.status+'). '+msg.slice(0,120))}
+    const d=await res.json();
+    let t=(((d.candidates||[])[0]||{}).content||{}).parts;t=t&&t.map(p=>p.text||'').join('');
+    if(!t)return fail('Gemini returned no result. Try rephrasing or a clearer photo.');
+    const r=JSON.parse(t.replace(/```json|```/g,'').trim()),n=v=>Math.max(0,R(+v)||0);
+    openMeal({id:Date.now(),d:sel,t:new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}),name:String(r.name||text||'Meal').slice(0,60),b:{k:n(r.kcal),p:n(r.p),c:n(r.c),f:n(r.f)},n:1,hs:Math.min(10,n(r.hs)),img:thumb||''},true);
+  }catch(x){fail('Could not reach Gemini. Check your internet connection and try again.')}
+}
+
+function openMeal(m,isNew){
+  const draw=()=>{const e=eff(m);
+    show(`${m.img?`<img class="big-img" src="${m.img}" alt="">`:''}<h3><input id="nm" value="${esc(m.name)}" style="border:0;background:none;text-align:center;font:inherit;font-weight:700;color:var(--text);width:100%"></h3>
+    <div class="g2"><div class="fl big"><label>Cal</label><input id="k" type="number" value="${e.k}"></div><div class="fl big"><label>Portions</label><div class="step" style="width:100%"><button id="mi">−</button><b id="pn">${m.n}</b><button id="pl">+</button></div></div></div>
+    <div class="g2"><div class="fl"><label>Protein (g)</label><input id="p" type="number" value="${e.p}"></div><div class="fl"><label>Fats (g)</label><input id="f" type="number" value="${e.f}"></div><div class="fl"><label>Carbs (g)</label><input id="c" type="number" value="${e.c}"></div><div class="fl"><label>Health score</label><input id="hs" type="number" min="0" max="10" value="${m.hs}" style="width:40px"><small>/10</small></div></div>
+    <button class="btn" id="sv">Save</button>${isNew?'<button class="btn s" id="ds">Discard</button>':'<button class="btn d" id="dl">Delete meal</button>'}`);
+    const rd=()=>{m.name=$('nm').value.slice(0,60)||'Meal'};
+    const bind=(id,key)=>$(id).oninput=()=>{const v=Math.max(0,+$(id).value||0);m.b[key]=v/m.n};
+    bind('k','k');bind('p','p');bind('f','f');bind('c','c');$('hs').oninput=()=>{m.hs=Math.min(10,Math.max(0,R(+$('hs').value||0)))};
+    $('mi').onclick=()=>{rd();m.n=Math.max(.5,m.n-.5);draw()};$('pl').onclick=()=>{rd();m.n=Math.min(10,m.n+.5);draw()};
+    $('sv').onclick=()=>{rd();if(isNew)M.push(m);else M[M.findIndex(x=>x.id===m.id)]=m;save();close();render()};
+    if(isNew)$('ds').onclick=close;else $('dl').onclick=()=>{M=M.filter(x=>x.id!==m.id);save();close();render()};
+  };draw();
+}
+
+$('gear').onclick=()=>{
+  const g={...G};
+  const P={Balanced:[30,40,30],'High protein':[40,30,30],'Low carb':[35,25,40],Keto:[25,5,70]};
+  show(`<h3>Goals &amp; settings</h3><div class="g2"><div class="fl big" style="grid-column:1/3"><label>Calories (kcal)</label><input id="gk" type="number" value="${g.kcal}"></div></div>
+  <div class="hint">Quick presets (protein / carbs / fat split)</div><div class="pre">${Object.keys(P).map(k=>`<button data-pr="${k}">${k} ${P[k].join('/')}</button>`).join('')}</div>
+  <div class="g2"><div class="fl"><label>Protein (g)</label><input id="gp" type="number" value="${g.p}"></div><div class="fl"><label>Carbs (g)</label><input id="gc" type="number" value="${g.c}"></div><div class="fl"><label>Fats (g)</label><input id="gf" type="number" value="${g.f}"></div></div>
+  <div class="hint" id="gh"></div>
+  <h2 style="margin:8px 0">Gemini AI (free key)</h2>
+  <input id="gkey" type="password" autocomplete="off" placeholder="Paste Gemini API key" value="${esc(LS('ns_key'))}" style="width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;margin-bottom:8px">
+  <input id="gmod" type="text" placeholder="Model" value="${esc(LS('ns_model')||'gemini-2.5-flash')}" style="width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit">
+  <div class="hint">Get a key at aistudio.google.com/app/apikey. It is stored only on this device. If you hit rate limits, try model gemini-2.5-flash-lite.</div>
+  <div class="err" id="ge" hidden></div>
+  <button class="btn s" id="gm">Match calories to macros</button><button class="btn" id="gs">Save goals</button>`);
+  const rd=()=>{g.kcal=+$('gk').value||0;g.p=+$('gp').value||0;g.c=+$('gc').value||0;g.f=+$('gf').value||0};
+  const hint=()=>{rd();const t=g.p*4+g.c*4+g.f*9;const pc=t?[R(g.p*4/t*100),R(g.c*4/t*100),R(g.f*9/t*100)]:[0,0,0];$('gh').textContent=`Macros add up to ${t} kcal (${pc[0]}% protein, ${pc[1]}% carbs, ${pc[2]}% fat).`+(Math.abs(t-g.kcal)>50?` That differs from your calorie goal by ${Math.abs(t-g.kcal)} kcal.`:'')};
+  const put=()=>{$('gk').value=g.kcal;$('gp').value=g.p;$('gc').value=g.c;$('gf').value=g.f;hint()};
+  ['gk','gp','gc','gf'].forEach(i=>$(i).oninput=hint);hint();
+  sh.querySelector('.pre').onclick=e=>{const k=e.target.dataset.pr;if(!k)return;rd();const [a,b,c]=P[k];g.p=R(g.kcal*a/100/4);g.c=R(g.kcal*b/100/4);g.f=R(g.kcal*c/100/9);put()};
+  $('gm').onclick=()=>{rd();g.kcal=g.p*4+g.c*4+g.f*9;put()};
+  $('gs').onclick=()=>{rd();if(g.kcal<500||g.kcal>8000||g.p<0||g.c<0||g.f<0||g.p<1||g.c<1||g.f<1){$('ge').textContent='Enter calories between 500 and 8000 and at least 1 g of each macro.';$('ge').hidden=false;return}G=g;save();LS('ns_key',$('gkey').value.trim());LS('ns_model',$('gmod').value.trim()||'gemini-2.5-flash');close();render()};
+};
+render();
+</script>
+</body>
+</html>
